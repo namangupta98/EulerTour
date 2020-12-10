@@ -1,4 +1,4 @@
-input = open('input_example.txt', 'r')
+input = open('input/in3.txt', 'r')
 G = {}
 
 
@@ -24,6 +24,7 @@ for node in adjacencylist:
 def isEulerTour(Graph):
     for node in Graph:
         if len(Graph[node]) % 2 != 0:
+            print('No Euler Tour exists!!')
             return False
 
     return True
