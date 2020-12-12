@@ -128,7 +128,7 @@ void getEulerCircuit(struct Graph* graph){
 	int curr_node = 0;
 	int new_node, temp_node;
 
-	addEdge(euler, curr_path, graph->adjLists[curr_node]->vertex); // curr_node = [0, next vertex in vertex 0 to make an edge]
+	addEdge(euler, curr_path, curr_node); // curr_node = [0, next vertex in vertex 0 to make an edge]
 	// addEdge(euler, curr_path, graph->adjLists[curr_node]->vertex);
 
 	while (euler->adjLists[curr_path]){
@@ -153,7 +153,6 @@ void getEulerCircuit(struct Graph* graph){
 		}
 	}
 
-	printf("Euler Tour: ");
 	while (euler->adjLists[eulerTour]){
 		printf("%d ", euler->adjLists[eulerTour]->vertex+1);
 		euler->adjLists[eulerTour] = euler->adjLists[eulerTour]->next;
@@ -210,8 +209,13 @@ int main(int argc, char *argv[])
 	}
 
 	if (isEulerTour(graph)){
+		printf("%d\n", 1);
 		getEulerCircuit(graph);
+		printf("\n");
 	}
+
+	else
+		printf("%d\n", 0);
 
 	// printGraph(graph);
 	// printf("Adjacency List: %d \n", graph->adjLists[2]->vertex);
