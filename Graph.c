@@ -42,10 +42,38 @@ void addEdge(struct Graph* graph, int s, int d){
 	newNode->next = graph->adjLists[s];
 	graph->adjLists[s] = newNode;
 
-	//add edge from d to s
-	newNode = createNode(s);
-	newNode->next = graph->adjLists[d];
-	graph->adjLists[d] = newNode;
+	// //add edge from d to s
+	// newNode = createNode(s);
+	// newNode->next = graph->adjLists[d];
+	// graph->adjLists[d] = newNode;
+}
+
+// delete edge
+void deleteEdge(struct Graph* graph, int head, int key){
+
+	// storing head
+	struct node* temp = graph->adjLists[head];
+	struct node* prev = NULL;
+
+	// if the head node is the key
+	if (temp != NULL && temp->vertex == key){
+		graph->adjLists[head] = temp->next;
+		free(temp);
+	}
+
+	// if not head = key then search for the key
+	else {
+
+		// iterating over the list until key is found
+		while (temp != NULL && temp->vertex != key){
+			prev = temp;
+			temp = temp->next;
+		}
+
+		// remove the node
+		prev->next = temp->next;
+		free(temp);
+	}
 }
 
 // print the graph
@@ -67,6 +95,11 @@ int main(){
 	addEdge(graph, 0, 2);
 	addEdge(graph, 0, 3);
 	addEdge(graph, 1, 2);
+
+	printGraph(graph);
+
+	printf("Deleting 2!! \n");
+	deleteEdge(graph, 0, 2);
 
 	printGraph(graph);
 
