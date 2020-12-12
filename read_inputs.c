@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 
+int edge_num = 0;
+
 // creating linked list
 struct node{
 	int vertex;
@@ -50,6 +52,34 @@ void addEdge(struct Graph* graph, int s, int d){
 	// graph->adjLists[d] = newNode;
 }
 
+// delete edge
+void deleteEdge(struct Graph* graph, int head, int key){
+
+	// storing head
+	struct node* temp = graph->adjLists[head];
+	struct node* prev = NULL;
+
+	// if the head node is the key
+	if (temp != NULL && temp->vertex == key){
+		graph->adjLists[head] = temp->next;
+		free(temp);
+	}
+
+	// if not head = key then search for the key
+	else {
+
+		// iterating over the list until key is found
+		while (temp != NULL && temp->vertex != key){
+			prev = temp;
+			temp = temp->next;
+		}
+
+		// remove the node
+		prev->next = temp->next;
+		free(temp);
+	}
+}
+
 // print the graph
 void printGraph(struct Graph* graph){
 	for (int v = 0; v < graph->numVertices; v++){
@@ -73,6 +103,7 @@ int isEulerTour(struct Graph* graph){
 		// count no. of edges
 		while (temp){
 			ctr += 1;
+			edge_num += 1;
 			// printf("%d ", temp->vertex);
 			temp = temp->next;
 		}
@@ -84,6 +115,49 @@ int isEulerTour(struct Graph* graph){
 		}
 	}
 	return(1);
+}
+
+// function to get euler circuit
+void getEulerCircuit(struct Graph* graph){
+
+	// creating a linked list for current path and euler tour.
+	struct Graph* euler = createGraph(2);
+	int curr_path = 0;	// the first element of adjacency list is curr_path list
+	int eulerTour = 1;	// the second element of adjacency list is tour list.
+
+	int curr_node = 0;
+	int new_node, temp_node;
+
+	addEdge(euler, curr_path, graph->adjLists[curr_node]->vertex); // curr_node = [0, next vertex in vertex 0 to make an edge]
+	// addEdge(euler, curr_path, graph->adjLists[curr_node]->vertex);
+
+	while (euler->adjLists[curr_path]){
+		if (graph->adjLists[curr_node]){
+
+			// storing random vertex which is neighbor of current vertex (popping)
+			new_node = graph->adjLists[curr_node]->vertex;
+
+			deleteEdge(graph, curr_node, new_node);
+			deleteEdge(graph, new_node, curr_node);
+
+			curr_node = new_node;
+
+			// adding current node in the path
+			addEdge(euler, curr_path, curr_node); 
+		}
+
+		else{
+			temp_node = euler->adjLists[curr_path]->vertex;
+			addEdge(euler, eulerTour, temp_node);
+			deleteEdge(euler, curr_path, temp_node);
+		}
+	}
+
+	printf("Euler Tour: ");
+	while (euler->adjLists[eulerTour]){
+		printf("%d ", euler->adjLists[eulerTour]->vertex+1);
+		euler->adjLists[eulerTour] = euler->adjLists[eulerTour]->next;
+	}
 }
 
 // main function
@@ -127,7 +201,7 @@ int main(int argc, char *argv[])
 			sscanf(pch, "%d", &dst_vertex); // storing connect node in dst_vertex
       		
       		// adding edge in the graph
-			addEdge(graph, src_vertex-1, dst_vertex);
+			addEdge(graph, src_vertex-1, dst_vertex-1);
 
 		    // TODO : please comment the following line
 		    // printf("Edge exists between (%d,%d)\n", src_vertex, dst_vertex);
@@ -135,9 +209,13 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	if (isEulerTour(graph)){
+		getEulerCircuit(graph);
+	}
+
 	// printGraph(graph);
 	// printf("Adjacency List: %d \n", graph->adjLists[2]->vertex);
-	printf("%d \n", isEulerTour(graph));
+	// printf("%d \n", isEulerTour(graph));
 
   clock_t end = clock();
   // printf("Time taken = %lf\n", ((double)end-begin)/CLOCKS_PER_SEC);
