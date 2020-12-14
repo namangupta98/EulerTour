@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-int edge_num = 0;
+char circuit[50];
 
 // creating linked list
 struct node{
@@ -80,18 +80,18 @@ void deleteEdge(struct Graph* graph, int head, int key){
 	}
 }
 
-// print the graph
-void printGraph(struct Graph* graph){
-	for (int v = 0; v < graph->numVertices; v++){
-		struct node* temp = graph->adjLists[v];
-		printf("\n Vertex %d\n: ", v+1);
-		while (temp){
-			printf("%d ", temp->vertex);
-			temp = temp->next;
-		}
-		printf("\n");
-	}
-}
+// // print the graph
+// void printGraph(struct Graph* graph){
+// 	for (int v = 0; v < graph->numVertices; v++){
+// 		struct node* temp = graph->adjLists[v];
+// 		printf("\n Vertex %d\n: ", v+1);
+// 		while (temp){
+// 			printf("%d ", temp->vertex);
+// 			temp = temp->next;
+// 		}
+// 		printf("\n");
+// 	}
+// }
 
 // Check Euler Tour exists
 int isEulerTour(struct Graph* graph){
@@ -103,7 +103,6 @@ int isEulerTour(struct Graph* graph){
 		// count no. of edges
 		while (temp){
 			ctr += 1;
-			edge_num += 1;
 			// printf("%d ", temp->vertex);
 			temp = temp->next;
 		}
@@ -116,6 +115,36 @@ int isEulerTour(struct Graph* graph){
 	}
 	return(1);
 }
+
+
+// generate a file
+void storeGraph(int val, struct Graph* euler){
+
+	// creating file pointer
+	FILE *fptr;
+
+	// open file
+	fptr = fopen(("A.txt"), "w");
+
+	// exiting program
+	if (fptr == NULL){
+		printf("Error! \n");
+		exit(1);
+	}
+
+	if (val == 0)
+		fprintf(fptr, "%d\n", val);
+	else
+		fprintf(fptr, "%d\n", val);
+		while (euler->adjLists[1]){
+			fprintf(fptr, "%d ", euler->adjLists[1]->vertex+1);
+			printf("%d ", euler->adjLists[1]->vertex+1);
+			euler->adjLists[1] = euler->adjLists[1]->next;
+		}
+
+	fclose(fptr);
+}
+
 
 // function to get euler circuit
 void getEulerCircuit(struct Graph* graph){
@@ -153,11 +182,13 @@ void getEulerCircuit(struct Graph* graph){
 		}
 	}
 
-	while (euler->adjLists[eulerTour]){
-		printf("%d ", euler->adjLists[eulerTour]->vertex+1);
-		euler->adjLists[eulerTour] = euler->adjLists[eulerTour]->next;
-	}
+	// while (euler->adjLists[eulerTour]){
+	// 	printf("%d ", euler->adjLists[eulerTour]->vertex+1);
+	// 	euler->adjLists[eulerTour] = euler->adjLists[eulerTour]->next;
+	// }
+	storeGraph(1, euler);
 }
+
 
 // main function
 int main(int argc, char *argv[])
@@ -209,8 +240,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (isEulerTour(graph)){
-		printf("%d\n", 1);
 		getEulerCircuit(graph);
+		// storeGraph(1);
 		printf("\n");
 	}
 
