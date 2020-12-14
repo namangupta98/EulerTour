@@ -3,7 +3,9 @@
 #include <string.h>
 #include <time.h>
 
-char circuit[50];
+// array to store # operations(C commands)
+int v_op[15];
+int e_op[15][15];
 
 // creating linked list
 struct node{
@@ -59,6 +61,10 @@ void deleteEdge(struct Graph* graph, int head, int key){
 	struct node* temp = graph->adjLists[head];
 	struct node* prev = NULL;
 
+	// counting operations on edge
+	if (sizeof(graph->adjLists) > 2)
+		e_op[head][key] += 3;
+
 	// if the head node is the key
 	if (temp != NULL && temp->vertex == key){
 		graph->adjLists[head] = temp->next;
@@ -93,21 +99,22 @@ void deleteEdge(struct Graph* graph, int head, int key){
 // 	}
 // }
 
-// Check Euler Tour exists
+// function to check Euler Tour exists
 int isEulerTour(struct Graph* graph){
 	for (int v = 0; v < graph->numVertices; v++){
 		struct node* temp = graph->adjLists[v];
-		// printf("\n Vertex %d\n: ", v);
 		int ctr = 0;
+		v_op[v] = 0;
 
 		// count no. of edges
 		while (temp){
 			ctr += 1;
-			// printf("%d ", temp->vertex);
 			temp = temp->next;
+			v_op[v] += 2;	// 2 operations performed in counting one edge and traversing to next
 		}
 
-		// check even edges
+		// check even no. of edges
+		v_op[v]++; // 1 operation to check even no. of edges on vertex v
 		if ((ctr % 2) != 0){
 			// printf("No Euler Tour exists!!");
 			return(0);
@@ -117,7 +124,7 @@ int isEulerTour(struct Graph* graph){
 }
 
 
-// generate a file
+// function to generate a file A.txt
 void storeGraph(int val, struct Graph* euler){
 
 	// creating file pointer
@@ -138,7 +145,7 @@ void storeGraph(int val, struct Graph* euler){
 		fprintf(fptr, "%d\n", val);
 		while (euler->adjLists[1]){
 			fprintf(fptr, "%d ", euler->adjLists[1]->vertex+1);
-			printf("%d ", euler->adjLists[1]->vertex+1);
+			// printf("%d ", euler->adjLists[1]->vertex+1);
 			euler->adjLists[1] = euler->adjLists[1]->next;
 		}
 
@@ -147,46 +154,51 @@ void storeGraph(int val, struct Graph* euler){
 
 
 // function to get euler circuit
-void getEulerCircuit(struct Graph* graph){
+void getEulerCircuit(int val, struct Graph* graph){
 
 	// creating a linked list for current path and euler tour.
 	struct Graph* euler = createGraph(2);
-	int curr_path = 0;	// the first element of adjacency list is curr_path list
-	int eulerTour = 1;	// the second element of adjacency list is tour list.
+	
+	if (val){
 
-	int curr_node = 0;
-	int new_node, temp_node;
+		int curr_path = 0;	// the first element of adjacency list is curr_path list
+		int eulerTour = 1;	// the second element of adjacency list is tour list.
 
-	addEdge(euler, curr_path, curr_node); // curr_node = [0, next vertex in vertex 0 to make an edge]
-	// addEdge(euler, curr_path, graph->adjLists[curr_node]->vertex);
+		int curr_node = 0;
+		int new_node, temp_node;
 
-	while (euler->adjLists[curr_path]){
-		if (graph->adjLists[curr_node]){
+		addEdge(euler, curr_path, curr_node); // curr_node = [0, next vertex in vertex 0 to make an edge]
+		// addEdge(euler, curr_path, graph->adjLists[curr_node]->vertex);
 
-			// storing random vertex which is neighbor of current vertex (popping)
-			new_node = graph->adjLists[curr_node]->vertex;
+		while (euler->adjLists[curr_path]){
+			if (graph->adjLists[curr_node]){
 
-			deleteEdge(graph, curr_node, new_node);
-			deleteEdge(graph, new_node, curr_node);
+				// storing random vertex which is neighbor of current vertex (popping)
+				new_node = graph->adjLists[curr_node]->vertex;
 
-			curr_node = new_node;
+				// deleting edge between source vertex and dest vertex
+				deleteEdge(graph, curr_node, new_node);
+				// e_op[curr_node][new_node] += ;
 
-			// adding current node in the path
-			addEdge(euler, curr_path, curr_node); 
-		}
+				deleteEdge(graph, new_node, curr_node);
+				// e_op[new_node][curr_node]
 
-		else{
-			temp_node = euler->adjLists[curr_path]->vertex;
-			addEdge(euler, eulerTour, temp_node);
-			deleteEdge(euler, curr_path, temp_node);
+				curr_node = new_node;
+
+				// adding current node in the path
+				addEdge(euler, curr_path, curr_node); 
+			}
+
+			else{
+				temp_node = euler->adjLists[curr_path]->vertex;
+				addEdge(euler, eulerTour, temp_node);
+				deleteEdge(euler, curr_path, temp_node);
+			}
 		}
 	}
 
-	// while (euler->adjLists[eulerTour]){
-	// 	printf("%d ", euler->adjLists[eulerTour]->vertex+1);
-	// 	euler->adjLists[eulerTour] = euler->adjLists[eulerTour]->next;
-	// }
-	storeGraph(1, euler);
+	// generate outputs A.txt, B.txt and C.txt
+	storeGraph(val, euler);
 }
 
 
@@ -200,7 +212,7 @@ int main(int argc, char *argv[])
 		printf("too few arguments !");
 		return 0;
 	}
-  clock_t begin = clock();
+  	clock_t begin = clock();
 
 	// read input from file
 	ifp = fopen(argv[1], "r");
@@ -209,7 +221,7 @@ int main(int argc, char *argv[])
 	char l[256];
 	while (fgets(l, sizeof l, ifp) != NULL) num_v++; // reads the lines
 	rewind(ifp);  // setting the pointer back to the beginning of the file
-
+	
 	// creating a graph
 	struct Graph* graph = createGraph(num_v);
 
@@ -239,14 +251,25 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (isEulerTour(graph)){
-		getEulerCircuit(graph);
-		// storeGraph(1);
-		printf("\n");
+	getEulerCircuit(isEulerTour(graph), graph);
+
+	// printing # of operations on vertices
+	for(int i = 0; i<num_v; i++){
+		printf("Total no. of operations on Vertex %d: %d\n", i+1, v_op[i]);
+		for (int j = 0; j<num_v; j++){
+			if (e_op[i][j] != 0)
+				printf("Total no. of operations on Edge(%d,%d): %d\n", i+1, j+1, e_op[i][j]);
+		}
 	}
 
-	else
-		printf("%d\n", 0);
+	// if (isEulerTour(graph)){
+	// 	getEulerCircuit(graph);
+	// 	// storeGraph(1);
+	// 	printf("\n");
+	// }
+
+	// else
+	// 	printf("%d\n", 0);
 
 	// printGraph(graph);
 	// printf("Adjacency List: %d \n", graph->adjLists[2]->vertex);
