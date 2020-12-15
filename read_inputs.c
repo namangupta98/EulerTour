@@ -6,6 +6,7 @@
 // array to store # operations(C commands)
 int v_op[15];
 int e_op[15][15];
+int sum = 0;
 
 // creating linked list
 struct node{
@@ -25,6 +26,7 @@ struct node* createNode(int v){
 	struct node* newNode = malloc(sizeof(struct node)); //allocate memory using malloc
 	newNode->vertex = v; // newNode's vertex is v
 	newNode->next = NULL; // newNode's next is pointing to NULL
+	sum+=5;
 	return newNode; // new node
 }
 
@@ -33,9 +35,12 @@ struct Graph* createGraph(int vertices){
 	struct Graph* graph = malloc(sizeof(struct Graph));
 	graph->numVertices = vertices; // no. of vertices in a graph
 	graph->adjLists = malloc(vertices * sizeof(struct node*));
+	sum+=4;
 
 	for (int i = 0; i < vertices; i++)
 		graph->adjLists[i] = NULL;
+	
+	sum+=vertices+1;
 
 	return graph;
 }
@@ -48,10 +53,7 @@ void addEdge(struct Graph* graph, int s, int d){
 	newNode->next = graph->adjLists[s];
 	graph->adjLists[s] = newNode;
 
-	// //add edge from d to s
-	// newNode = createNode(s);
-	// newNode->next = graph->adjLists[d];
-	// graph->adjLists[d] = newNode;
+	sum+=4;
 }
 
 // delete edge
@@ -60,15 +62,14 @@ void deleteEdge(struct Graph* graph, int head, int key){
 	// storing head
 	struct node* temp = graph->adjLists[head];
 	struct node* prev = NULL;
-
-	// counting operations on edge
-	if (sizeof(graph->adjLists) > 2)
-		e_op[head][key] += 3;
+	sum+=3;
 
 	// if the head node is the key
 	if (temp != NULL && temp->vertex == key){
 		graph->adjLists[head] = temp->next;
+		v_op[temp->vertex]+=3;
 		free(temp);
+		sum+=3;
 	}
 
 	// if not head = key then search for the key
@@ -78,13 +79,73 @@ void deleteEdge(struct Graph* graph, int head, int key){
 		while (temp != NULL && temp->vertex != key){
 			prev = temp;
 			temp = temp->next;
+			v_op[prev->vertex] += 3;
+			sum+=3;
 		}
 
 		// remove the node
 		prev->next = temp->next;
+		v_op[temp->vertex]+=2;
 		free(temp);
+		sum+=3;
 	}
 }
+
+
+// function to get max value
+int max(int a, int max){
+	if (a>max)
+		return (a);
+	
+	return(max);
+}
+
+
+// function to generate output text files B and C
+void generateOutputs(int val, int num_v){
+	
+	// variable for max
+	int max_v = 0;
+	int max_e = 0;
+
+	// creating file pointer
+	FILE *fptr;
+
+	// open file
+	if (!val)
+		fptr = fopen(("B.txt"), "w");
+	else
+		fptr = fopen(("C.txt"), "w");
+
+	// exiting program
+	if (fptr == NULL){
+		printf("Error! \n");
+		exit(1);
+	}
+
+	// printing # of operations on vertices
+	for(int i = 0; i<num_v; i++){
+		max_v = max(v_op[i], max_v);
+		
+		if (!val)
+			fprintf(fptr, "Total no. of operations to Vertex %d: %d\n", i+1, v_op[i]);
+
+		for (int j = 0; j<num_v; j++){
+			if (e_op[i][j] != 0){
+				max_e = max(e_op[i][j], max_e);
+
+				if (!val)
+					fprintf(fptr, "Total no. of operations to Edge(%d,%d): %d\n", i+1, j+1, e_op[i][j]);
+
+			}
+		}
+	}
+
+	fprintf(fptr, "Maximum number of operations charged to any single vertex is: %d\n", max_v);
+	fprintf(fptr, "Maximum number of operations charged to any single edge is: %d\n", max_e);
+	fprintf(fptr, "Total number of operations is: %d\n", sum);
+}
+
 
 // // print the graph
 // void printGraph(struct Graph* graph){
@@ -104,6 +165,7 @@ int isEulerTour(struct Graph* graph){
 	for (int v = 0; v < graph->numVertices; v++){
 		struct node* temp = graph->adjLists[v];
 		int ctr = 0;
+		sum+=3;
 		v_op[v] += 2;
 
 		// count no. of edges
@@ -111,14 +173,17 @@ int isEulerTour(struct Graph* graph){
 			e_op[v][temp->vertex] += 3;	// 2 operations performed in counting one edge and traversing to next
 			ctr += 1;
 			temp = temp->next;
+			sum+=4;
 		}
 
 		// check even no. of edges
 		v_op[v]++; // 1 operation to check even no. of edges on vertex v
 		if ((ctr % 2) != 0){
+			sum+=3;
 			// printf("No Euler Tour exists!!");
 			return(0);
 		}
+		sum+=3;
 	}
 	return(1);
 }
@@ -164,11 +229,12 @@ void getEulerCircuit(int val, struct Graph* graph){
 		int curr_path = 0;	// the first element of adjacency list is curr_path list
 		int eulerTour = 1;	// the second element of adjacency list is tour list.
 
-		int curr_node = 0;
+		int curr_node = 0;	// first node - 1
 		int new_node, temp_node;
 
 		addEdge(euler, curr_path, curr_node); // curr_node = [0, next vertex in vertex 0 to make an edge]
-		// addEdge(euler, curr_path, graph->adjLists[curr_node]->vertex);
+		v_op[curr_node]++; // Vertex-1 added to list curr_path
+		sum+=6;
 
 		while (euler->adjLists[curr_path]){
 			if (graph->adjLists[curr_node]){
@@ -178,27 +244,31 @@ void getEulerCircuit(int val, struct Graph* graph){
 
 				// deleting edge between source vertex and dest vertex
 				deleteEdge(graph, curr_node, new_node);
-				// e_op[curr_node][new_node] += ;
+				e_op[curr_node][new_node] += 3;
 
 				deleteEdge(graph, new_node, curr_node);
-				// e_op[new_node][curr_node]
+				e_op[new_node][curr_node] += 3;
 
 				curr_node = new_node;
 
 				// adding current node in the path
-				addEdge(euler, curr_path, curr_node); 
+				addEdge(euler, curr_path, curr_node);
+				v_op[curr_node]++;
 			}
 
 			else{
 				temp_node = euler->adjLists[curr_path]->vertex;
 				addEdge(euler, eulerTour, temp_node);
+				v_op[temp_node]++;
 				deleteEdge(euler, curr_path, temp_node);
 			}
 		}
 	}
 
+	sum+=3;
 	// generate outputs A.txt, B.txt and C.txt
 	storeGraph(val, euler);
+	generateOutputs(val,sizeof(graph));
 }
 
 
@@ -253,14 +323,7 @@ int main(int argc, char *argv[])
 
 	getEulerCircuit(isEulerTour(graph), graph);
 
-	// printing # of operations on vertices
-	for(int i = 0; i<num_v; i++){
-		printf("Total no. of operations on Vertex %d: %d\n", i+1, v_op[i]);
-		for (int j = 0; j<num_v; j++){
-			if (e_op[i][j] != 0)
-				printf("Total no. of operations on Edge(%d,%d): %d\n", i+1, j+1, e_op[i][j]);
-		}
-	}
+
 
 	// if (isEulerTour(graph)){
 	// 	getEulerCircuit(graph);
@@ -276,7 +339,7 @@ int main(int argc, char *argv[])
 	// printf("%d \n", isEulerTour(graph));
 
   clock_t end = clock();
-  // printf("Time taken = %lf\n", ((double)end-begin)/CLOCKS_PER_SEC);
+  printf("Time taken = %lf\n", ((double)end-begin)/CLOCKS_PER_SEC);
 
 	fclose(ifp);
 }
