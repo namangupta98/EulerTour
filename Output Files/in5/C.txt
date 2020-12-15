@@ -1,0 +1,3 @@
+Maximum number of operations charged to any single vertex is: 52
+Maximum number of operations charged to any single edge is: 6
+Total number of operations is: 2457
