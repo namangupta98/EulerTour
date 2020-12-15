@@ -104,13 +104,13 @@ int isEulerTour(struct Graph* graph){
 	for (int v = 0; v < graph->numVertices; v++){
 		struct node* temp = graph->adjLists[v];
 		int ctr = 0;
-		v_op[v] = 0;
+		v_op[v] += 2;
 
 		// count no. of edges
 		while (temp){
+			e_op[v][temp->vertex] += 3;	// 2 operations performed in counting one edge and traversing to next
 			ctr += 1;
 			temp = temp->next;
-			v_op[v] += 2;	// 2 operations performed in counting one edge and traversing to next
 		}
 
 		// check even no. of edges
