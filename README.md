@@ -7,7 +7,7 @@ Euler path of an undirected (or directed) graph is a path that traverses all edg
 
 # Overview
 
-Let G = (V, E) be an undirected, connected, simple graph.  The goal of this project is to find if an Euler tour(not Euler path) exists for given undirected, connected, simple graphs, and to print such a tour, if they do indeed have one.
+Let G = (V, E) be an undirected, connected, simple graph.  The goal of this project is to find if an Euler tour(not Euler path) exists for given undirected, connected, simple graphs, and to print such a tour, if they do indeed have one. Here, we used Hierholzer's Algorithm to print Euler Tour.
 
 ## Dependencies
 
